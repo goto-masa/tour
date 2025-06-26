@@ -12,15 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('hotels', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('address');
-            $table->unsignedBigInteger('tel');
-            $table->unsignedBigInteger('contact');
-            $table->string('lang');
-            $table->string('note')->nullable();
-            $table->timestamp('deleted_at')->nullable();
-            $table->timestamps();
+            $table->id()->comment('ID');
+            $table->string('name')->comment('ホテル名');
+            $table->string('address')->comment('住所');
+            $table->unsignedBigInteger('tel')->comment('電話番号');
+            $table->unsignedBigInteger('contact')->comment('担当連絡先');
+            $table->string('lang')->comment('言語');
+            $table->string('note')->nullable()->comment('備考');
+            $table->timestamp('deleted_at')->nullable()->comment('削除日');
+            $table->timestamp('created_at')->nullable()->comment('作成日時');
+            $table->timestamp('updated_at')->nullable()->comment('更新日時');
         });
     }
 
