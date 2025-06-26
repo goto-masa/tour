@@ -12,6 +12,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Radio;
+use Filament\Tables\Columns\TextColumn;
 
 class HotelCaseResource extends Resource
 {
@@ -19,11 +26,86 @@ class HotelCaseResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationLabel = '案件管理';
+    protected static ?string $navigationGroup = null;
+    protected static ?string $label = '案件';
+    protected static ?string $pluralLabel = '案件';
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                Grid::make(1)->schema([
+                    TextInput::make('hotel_name')
+                        ->label('ホテル名')
+                        ->required(),
+                    TextInput::make('writer_name')
+                        ->label('記入者名')
+                        ->required(),
+                    TextInput::make('guest_name')
+                        ->label('ゲスト名（代表者名）')
+                        ->required(),
+                    TextInput::make('guest_count')
+                        ->label('ゲスト人数')
+                        ->required()
+                        ->numeric()
+                        ->rule('integer')
+                        ->minValue(1),
+                    Textarea::make('request_detail')
+                        ->label('ご依頼内容（サービスの内容）')
+                        ->required(),
+                    TextInput::make('dispatch_location')
+                        ->label('ガイドを派遣する場所')
+                        ->required(),
+                    DatePicker::make('service_start')
+                        ->label('サービス手配日時')
+                        ->required()
+                        ->default(now()),
+                    DatePicker::make('service_end')
+                        ->label('サービス終了日時')
+                        ->required()
+                        ->default(now()),
+                    TextInput::make('service_hours')
+                        ->label('サービス提供時間')
+                        ->required()
+                        ->numeric()
+                        ->rule('integer')
+                        ->minValue(1),
+                    Select::make('guide_language')
+                        ->label('ガイド言語')
+                        ->options(require app_path('Support/Languages.php'))
+                        ->required(),
+                    Select::make('vehicle_type')
+                        ->label('希望車種')
+                        ->options([
+                            'VAN' => 'VAN',
+                            'SEDAN' => 'SEDAN',
+                        ])
+                        ->required(),
+                    Textarea::make('desired_areas')
+                        ->label('ゲストの方がご希望されている観光エリア、観光スポット、アクティビティ')
+                        ->required(),
+                    Radio::make('multi_day')
+                        ->label('複数日で依頼する')
+                        ->options([0 => 'いいえ', 1 => 'はい'])
+                        ->default(0),
+                    DatePicker::make('day2_start')
+                        ->label('2日目のサービス手配日時')
+                        ->default(now()),
+                    DatePicker::make('day2_end')
+                        ->label('2日目のサービス終了日時')
+                        ->default(now()),
+                    DatePicker::make('day3_start')
+                        ->label('3日目のサービス手配日時')
+                        ->default(now()),
+                    DatePicker::make('day3_end')
+                        ->label('3日目のサービス終了日時')
+                        ->default(now()),
+                    Textarea::make('extra_requests')
+                        ->label('その他お申し付け事項'),
+                    Textarea::make('others_schedule')
+                        ->label('4日目以降のサービス手配日時、終了日時'),
+                ]),
             ]);
     }
 
@@ -31,10 +113,35 @@ class HotelCaseResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('hotel_name')->label('ホテル名')->searchable(),
+                TextColumn::make('writer_name')->label('記入者名')->searchable(),
+                TextColumn::make('guest_name')->label('ゲスト名（代表者名）')->searchable(),
+                TextColumn::make('guest_count')->label('ゲスト人数')->searchable(),
+                TextColumn::make('request_detail')->label('ご依頼内容（サービスの内容）')->searchable(),
+                TextColumn::make('dispatch_location')->label('ガイドを派遣する場所')->searchable(),
+                TextColumn::make('service_start')->label('サービス手配日時')->dateTime('Y/m/d H:i:s')->searchable(),
+                TextColumn::make('service_end')->label('サービス終了日時')->dateTime('Y/m/d H:i:s')->searchable(),
+                TextColumn::make('service_hours')->label('サービス提供時間')->searchable(),
+                TextColumn::make('guide_language')
+                    ->label('ガイド言語')
+                    ->formatStateUsing(function ($state) {
+                        $langs = require app_path('Support/Languages.php');
+                        return $langs[$state] ?? $state;
+                    })->searchable(),
+                TextColumn::make('vehicle_type')->label('希望車種')->searchable(),
+                TextColumn::make('desired_areas')->label('ゲストの方がご希望されている観光エリア、観光スポット、アクティビティ')->searchable(),
+                TextColumn::make('multi_day')
+                    ->label('複数日で依頼する')
+                    ->formatStateUsing(fn ($state) => $state == 1 ? '依頼する' : '依頼しない')->searchable(),
+                TextColumn::make('day2_start')->label('2日目のサービス手配日時')->dateTime('Y/m/d H:i:s')->searchable(),
+                TextColumn::make('day2_end')->label('2日目のサービス終了日時')->dateTime('Y/m/d H:i:s')->searchable(),
+                TextColumn::make('day3_start')->label('3日目のサービス手配日時')->dateTime('Y/m/d H:i:s')->searchable(),
+                TextColumn::make('day3_end')->label('3日目のサービス終了日時')->dateTime('Y/m/d H:i:s')->searchable(),
+                TextColumn::make('extra_requests')->label('その他お申し付け事項')->searchable(),
+                TextColumn::make('others_schedule')->label('4日目以降のサービス手配日時、終了日時')->searchable(),
             ])
             ->filters([
-                //
+                // 必要に応じて
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

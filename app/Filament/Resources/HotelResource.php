@@ -42,7 +42,10 @@ class HotelResource extends Resource
                         ->required(),
                     TextInput::make('tel')
                         ->label('電話番号')
-                        ->required(),
+                        ->required()
+                        ->numeric()
+                        ->rule('integer')
+                        ->minValue(1),
                     TextInput::make('contact')
                         ->label('担当連絡先')
                         ->required(),
@@ -62,10 +65,15 @@ class HotelResource extends Resource
             ->columns([
                 TextColumn::make('name')->label('ホテル名')->searchable(),
                 TextColumn::make('address')->label('住所')->searchable(),
-                TextColumn::make('tel')->label('電話番号'),
-                TextColumn::make('contact')->label('担当連絡先'),
-                TextColumn::make('lang')->label('言語'),
-                TextColumn::make('note')->label('備考')->limit(30),
+                TextColumn::make('tel')->label('電話番号')->searchable(),
+                TextColumn::make('contact')->label('担当連絡先')->searchable(),
+                TextColumn::make('lang')
+                    ->label('言語')
+                    ->formatStateUsing(function ($state) {
+                        $langs = require app_path('Support/Languages.php');
+                        return $langs[$state] ?? $state;
+                    })->searchable(),
+                TextColumn::make('note')->label('備考')->limit(30)->searchable(),
             ])
             ->filters([
                 // 必要に応じて
