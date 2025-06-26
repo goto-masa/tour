@@ -19,9 +19,8 @@ return new class extends Migration
             $table->unsignedBigInteger('contact')->comment('担当連絡先');
             $table->string('lang')->comment('言語');
             $table->string('note')->nullable()->comment('備考');
-            $table->timestamp('deleted_at')->nullable()->comment('削除日');
-            $table->timestamp('created_at')->nullable()->comment('作成日時');
-            $table->timestamp('updated_at')->nullable()->comment('更新日時');
+            $table->softDeletes()->comment('削除日');
+            $table->timestamps();
         });
     }
 

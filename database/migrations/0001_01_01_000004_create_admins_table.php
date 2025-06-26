@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('admins', function (Blueprint $table) {
             $table->id()->comment('ID');
-            $table->string('name', 255)->unique()->comment('ユーザ名');
+            $table->string('name', 255)->comment('ユーザ名');
+            $table->string('email', 255)->unique()->comment('メールアドレス（ログインID）');
+            $table->timestamp('email_verified_at')->nullable()->comment('メール認証日時');
             $table->string('password', 255)->comment('パスワード');
-            $table->timestamp('deleted_at')->nullable()->comment('削除日');
-            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate()->comment('更新日時');
-            $table->timestamp('created_at')->useCurrent()->comment('作成日時');
+            $table->rememberToken()->comment('ログイン保持トークン');
+            $table->timestamp('last_login_at')->nullable()->comment('最終ログイン日時');
+            $table->softDeletes()->comment('削除日');
+            $table->timestamps();
         });
     }
 

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('service', 255)->unique()->comment('対応サービス');
             $table->string('type', 255)->nullable()->comment('車種');
             $table->unsignedBigInteger('duration')->comment('サービス利用時間');
-            $table->timestamp('deleted_at')->nullable();
+            $table->softDeletes()->comment('削除日');
             $table->timestamps();
         });
     }
