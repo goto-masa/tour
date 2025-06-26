@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id()->comment('ID');
             $table->string('name')->comment('ホテル名');
             $table->string('address')->comment('住所');
-            $table->unsignedBigInteger('tel')->comment('電話番号');
-            $table->unsignedBigInteger('contact')->comment('担当連絡先');
+            $table->string('tel')->comment('電話番号');
+            $table->string('contact')->comment('担当連絡先');
             $table->string('lang')->comment('言語');
             $table->string('note')->nullable()->comment('備考');
             $table->softDeletes()->comment('削除日');
