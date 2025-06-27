@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Livewire\UserRequestForm;
 
 Route::get('/', function () {
     return view('welcome');
@@ -26,3 +27,5 @@ Route::get('/create-draft-from-msgid', function () {
 
 Route::post('/gmail/drafts/from-msgid', [\App\Http\Controllers\GmailDraftController::class, 'storeFromMsgId'])
     ->name('gmail.drafts.store_from_msgid');
+
+Route::get('/user-request', UserRequestForm::class)->name('user-request');

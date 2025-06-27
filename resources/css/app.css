@@ -9,3 +9,12 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+.p-title-h2{
+    font-size: 14px;
+}
+.p-text{
+    font-size: 14px;
+}
+.p-modal{
+    background-color: rgba(0, 0, 0, 0.5);
+}

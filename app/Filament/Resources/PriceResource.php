@@ -28,6 +28,8 @@ class PriceResource extends Resource
     protected static ?string $label = '価格';
     protected static ?string $pluralLabel = '価格';
 
+    protected static ?int $navigationSort = 2;
+
     public static function form(Form $form): Form
     {
         return $form

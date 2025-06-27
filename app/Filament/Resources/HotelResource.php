@@ -29,6 +29,8 @@ class HotelResource extends Resource
     protected static ?string $label = 'ホテル';//新規作成見出し
     protected static ?string $pluralLabel = 'ホテル';
 
+    protected static ?int $navigationSort = 1;
+
     public static function form(Form $form): Form
     {
         return $form

@@ -26,6 +26,8 @@ class HotelCaseResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?int $navigationSort = 3;
+
     protected static ?string $navigationLabel = '案件管理';
     protected static ?string $navigationGroup = null;
     protected static ?string $label = '案件';
