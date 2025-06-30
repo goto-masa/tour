@@ -1,10 +1,23 @@
-<div class="w-full sm:max-w-2xl mx-auto p-2 sm:p-6 bg-white rounded shadow">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>...</title>
+    <style>
+        @media screen and (max-width:768px){
+            .p-frame{
+                padding: 20px;
+                height: 100%;
+            }
+        }
+    </style>
+</head>
+<div class="p-frame w-full sm:max-w-2xl mx-auto p-2 sm:p-6 bg-white rounded shadow">
     <h2 class="text-xl font-bold mb-8  text-center md:text-left">KRO ガイド業務完了報告書<br>
     <span class="p-title-h2">KRO Guide Work Completion Report</span></h2>
 
-    @if (session()->has('message'))
+    @if ($message)
         <div class="mb-8 p-2 bg-green-100 text-green-800 rounded">
-            {{ session('message') }}
+            {{ $message }}
         </div>
     @endif
     <div class="mb-8">
@@ -170,16 +183,6 @@
         @error('report') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
     </div>
 
-    <div class="mb-8">
-        <label class="block mb-1">案件選択</label>
-        <select wire:model.defer="hotel_case_id" class="w-full border rounded p-2">
-            <option value="">選択してください</option>
-            @foreach ($hotelCases as $case)
-                <option value="{{ $case->id }}">{{ $case->hotel_name }}（{{ $case->guest_name }}）</option>
-            @endforeach
-        </select>
-        @error('hotel_case_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-    </div>
     <button 
         type="button" 
         wire:click="openConfirmModal" 
@@ -196,7 +199,7 @@
             @media (max-width: 640px) {
                 .modal-content-custom { max-width: 98vw !important; padding: 1rem !important; }
             }
-        </style>
+        </>
         <div class="p-modal fixed inset-0 bg-opacity-10 flex items-center justify-center z-50" wire:click="hideConfirmModal">
             <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-xl modal-content-custom relative overflow-y-auto max-h-[90vh] border border-blue-100" wire:click.stop>
                 <button type="button" wire:click="hideConfirmModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-3xl leading-none font-bold transition-all duration-150" style="line-height:1;">×</button>
@@ -250,6 +253,10 @@
                                 <li class="text-gray-400">なし</li>
                             @endforelse
                         </ul>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xs text-gray-500 mb-1">ガイドレポート</span>
+                        <span class="text-gray-700 whitespace-pre-line">{{ $report }}</span>
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 mt-8">

@@ -28,4 +28,8 @@ Route::get('/create-draft-from-msgid', function () {
 Route::post('/gmail/drafts/from-msgid', [\App\Http\Controllers\GmailDraftController::class, 'storeFromMsgId'])
     ->name('gmail.drafts.store_from_msgid');
 
+// ガイド報告書入力フォーム
 Route::get('/user-request', UserRequestForm::class)->name('user-request');
+Route::get('/user-request/submitted', function () {
+    return view('submitted');
+})->name('guide-report.submitted');

@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\HotelCase;
 use Illuminate\Support\Facades\Log;
+use App\Models\GuideReport;
 
 class UserRequestForm extends Component
 {
@@ -24,14 +25,16 @@ class UserRequestForm extends Component
     public $showConfirmModal = false;
     public $schedules = [];
     public $report = '';
-    public $hotelCases = [];
+    public $message = '';
 
     public function mount()
     {
-        $this->hotelCases = HotelCase::all();
         $this->schedule_time = '';
         $this->schedule_item = '';
         $this->expenses = [];
+        if (session()->has('message')) {
+            $this->message = session('message');
+        }
     }
 
     public function addSchedule()
@@ -114,9 +117,25 @@ class UserRequestForm extends Component
         // 送信確認用のログ出力
         Log::info('UserRequestForm submit called at ' . now());
 
-        session()->flash('message', '申請が送信されました！（' . now()->format('Y-m-d H:i:s') . '）');
+        // DB保存処理
+        GuideReport::create([
+            'guide_email' => $this->guide_email,
+            'guide_name' => $this->guide_name,
+            'guest_name' => $this->guest_name,
+            'number_of_guests' => $this->number_of_guests,
+            'service_date' => $this->service_date,
+            'finish_time' => $this->finish_time,
+            'duration' => $this->duration === '' ? null : $this->duration,
+            'schedules' => $this->schedules,
+            'expenses' => $this->expenses,
+            'report' => $this->report,
+            'comment' => $this->comment,
+        ]);
+
         $this->reset(['guide_name', 'guest_name', 'service_date', 'finish_time', 'duration', 'schedules', 'schedule_time', 'schedule_item', 'expenses', 'expense_item', 'expense_amount', 'comment', 'guide_email', 'report']);
         $this->showConfirmModal = false;
+
+        return redirect()->route('guide-report.submitted')->with('message', '申請が送信されました！（' . now()->format('Y-m-d H:i:s') . '）');
     }
 
     public function render()
