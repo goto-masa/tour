@@ -24,5 +24,18 @@ class Price extends Model
         'service',
         'type',
         'duration',
+        'price_including_tax',
+        'price_excluding_tax',
     ];
+
+    /**
+     * 税抜価格を取得（アクセサ）
+     */
+    public function getPriceExcludingTaxAttribute()
+    {
+        if ($this->price_including_tax !== null) {
+            return round($this->price_including_tax / 1.1);
+        }
+        return null;
+    }
 }

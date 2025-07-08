@@ -19,6 +19,8 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
+use Illuminate\Support\Facades\Storage;
 
 class HotelCaseResource extends Resource
 {
@@ -38,6 +40,13 @@ class HotelCaseResource extends Resource
         return $form
             ->schema([
                 Grid::make(1)->schema([
+                    Select::make('guide_report_id')
+                        ->label('ガイド報告書ID')
+                        ->options(function () {
+                            return \App\Models\GuideReport::all()->pluck('id', 'id');
+                        })
+                        ->searchable()
+                        ->nullable(),
                     TextInput::make('hotel_name')
                         ->label('ホテル名')
                         ->required(),
@@ -115,6 +124,14 @@ class HotelCaseResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('guide_report_id')
+                    ->label('ガイド報告書ID')
+                    ->searchable(),
+                // 連携済みバッジ（BadgeColumnでラベル表示）
+                \Filament\Tables\Columns\BadgeColumn::make('guide_report_linked')
+                    ->label('ガイド報告書連携')
+                    ->getStateUsing(fn ($record) => $record->guide_report_id ? '連携済み' : null)
+                    ->colors(['success' => '連携済み']),
                 TextColumn::make('hotel_name')->label('ホテル名')->searchable(),
                 TextColumn::make('writer_name')->label('記入者名')->searchable(),
                 TextColumn::make('guest_name')->label('ゲスト名（代表者名）')->searchable(),
@@ -147,9 +164,39 @@ class HotelCaseResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('generate_invoice')
+                    ->label('請求書作成')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->action(function ($record) {
+                        return \App\Http\Controllers\InvoiceController::download($record->id);
+                    })
+                    ->color('primary')
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->guide_report_id !== null),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('generate_invoices')
+                        ->label('請求書作成')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->action(function ($records) {
+                            foreach ($records as $record) {
+                                if (!$record->guide_report_id) continue;
+                                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('invoices.hotel_case', [
+                                    'hotelCase' => $record,
+                                    'guideReport' => $record->guideReport,
+                                ]);
+                                $fileName = 'invoice_' . $record->id . '_' . now()->format('YmdHis') . '.pdf';
+                                $filePath = 'invoices/' . $fileName;
+                                \Storage::disk('local')->put($filePath, $pdf->output());
+                                \App\Models\Invoice::create([
+                                    'hotel_case_id' => $record->id,
+                                    'file_path' => $filePath,
+                                ]);
+                            }
+                        })
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion(),
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);

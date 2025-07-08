@@ -31,5 +31,19 @@ class HotelCase extends Model
         'day3_start',
         'day3_end',
         'others_schedule',
+        'guide_report_id',
     ];
+
+    /**
+     * ガイド報告書とのリレーション
+     */
+    public function guideReport()
+    {
+        return $this->belongsTo(GuideReport::class, 'guide_report_id');
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
 }
