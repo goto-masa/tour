@@ -25,13 +25,6 @@ return new class extends Migration
             $table->string('guide_language', 50)->comment('ガイド言語');
             $table->string('vehicle_type', 100)->comment('希望車種');
             $table->text('desired_areas')->comment('観光エリア、スポット、アクティビティ');
-            $table->text('extra_requests')->nullable()->comment('その他お申し付け事項');
-            $table->boolean('multi_day')->default(false)->comment('複数日で依頼する');
-            $table->timestamp('day2_start')->nullable()->comment('2日目のサービス手配日時');
-            $table->timestamp('day2_end')->nullable()->comment('2日目のサービス終了日時');
-            $table->timestamp('day3_start')->nullable()->comment('3日目のサービス手配日時');
-            $table->timestamp('day3_end')->nullable()->comment('3日目のサービス終了日時');
-            $table->text('others_schedule')->nullable()->comment('4日目以降のサービス手配日時、終了日時');
             $table->timestamp('deleted_at')->nullable()->comment('削除日');
             $table->timestamps();
         });

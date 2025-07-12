@@ -24,13 +24,6 @@ class HotelCase extends Model
         'guide_language',
         'vehicle_type',
         'desired_areas',
-        'extra_requests',
-        'multi_day',
-        'day2_start',
-        'day2_end',
-        'day3_start',
-        'day3_end',
-        'others_schedule',
         'guide_report_id',
     ];
 

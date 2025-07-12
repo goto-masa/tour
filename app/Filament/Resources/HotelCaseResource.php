@@ -21,6 +21,7 @@ use Filament\Forms\Components\Radio;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Illuminate\Support\Facades\Storage;
+use Filament\Forms\Components\DateTimePicker;
 
 class HotelCaseResource extends Resource
 {
@@ -68,20 +69,50 @@ class HotelCaseResource extends Resource
                     TextInput::make('dispatch_location')
                         ->label('ガイドを派遣する場所')
                         ->required(),
-                    DatePicker::make('service_start')
+                    DateTimePicker::make('service_start')
                         ->label('サービス手配日時')
                         ->required()
-                        ->default(now()),
-                    DatePicker::make('service_end')
+                        ->default(now())
+                        ->withoutSeconds()
+                        ->displayFormat('Y-m-d H:i')
+                        ->reactive()
+                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                            $start = $state;
+                            $end = $get('service_end');
+                            if ($start && $end) {
+                                $hours = (int) ((strtotime($end) - strtotime($start)) / 3600);
+                                $set('service_hours', $hours > 0 ? $hours : 1);
+                            }
+                        }),
+                    DateTimePicker::make('service_end')
                         ->label('サービス終了日時')
                         ->required()
-                        ->default(now()),
+                        ->default(now())
+                        ->withoutSeconds()
+                        ->displayFormat('Y-m-d H:i')
+                        ->minDate(fn ($get) => $get('service_start'))
+                        ->reactive()
+                        ->after('service_start')
+                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                            $start = $get('service_start');
+                            $end = $state;
+                            if ($start && $end) {
+                                $hours = (int) ((strtotime($end) - strtotime($start)) / 3600);
+                                $set('service_hours', $hours > 0 ? $hours : 1);
+                            }
+                        }),
                     TextInput::make('service_hours')
                         ->label('サービス提供時間')
                         ->required()
                         ->numeric()
                         ->rule('integer')
-                        ->minValue(1),
+                        ->minValue(1)
+                        ->default(fn ($get) => (
+                            $get('service_start') && $get('service_end')
+                                ? (int) ((strtotime($get('service_end')) - strtotime($get('service_start'))) / 3600)
+                                : null
+                        ))
+                        ->reactive(),
                     Select::make('guide_language')
                         ->label('ガイド言語')
                         ->options(require app_path('Support/Languages.php'))
@@ -96,26 +127,6 @@ class HotelCaseResource extends Resource
                     Textarea::make('desired_areas')
                         ->label('ゲストの方がご希望されている観光エリア、観光スポット、アクティビティ')
                         ->required(),
-                    Radio::make('multi_day')
-                        ->label('複数日で依頼する')
-                        ->options([0 => 'いいえ', 1 => 'はい'])
-                        ->default(0),
-                    DatePicker::make('day2_start')
-                        ->label('2日目のサービス手配日時')
-                        ->default(now()),
-                    DatePicker::make('day2_end')
-                        ->label('2日目のサービス終了日時')
-                        ->default(now()),
-                    DatePicker::make('day3_start')
-                        ->label('3日目のサービス手配日時')
-                        ->default(now()),
-                    DatePicker::make('day3_end')
-                        ->label('3日目のサービス終了日時')
-                        ->default(now()),
-                    Textarea::make('extra_requests')
-                        ->label('その他お申し付け事項'),
-                    Textarea::make('others_schedule')
-                        ->label('4日目以降のサービス手配日時、終了日時'),
                 ]),
             ]);
     }
@@ -149,54 +160,22 @@ class HotelCaseResource extends Resource
                     })->searchable(),
                 TextColumn::make('vehicle_type')->label('希望車種')->searchable(),
                 TextColumn::make('desired_areas')->label('ゲストの方がご希望されている観光エリア、観光スポット、アクティビティ')->searchable(),
-                TextColumn::make('multi_day')
-                    ->label('複数日で依頼する')
-                    ->formatStateUsing(fn ($state) => $state == 1 ? '依頼する' : '依頼しない')->searchable(),
-                TextColumn::make('day2_start')->label('2日目のサービス手配日時')->dateTime('Y/m/d H:i:s')->searchable(),
-                TextColumn::make('day2_end')->label('2日目のサービス終了日時')->dateTime('Y/m/d H:i:s')->searchable(),
-                TextColumn::make('day3_start')->label('3日目のサービス手配日時')->dateTime('Y/m/d H:i:s')->searchable(),
-                TextColumn::make('day3_end')->label('3日目のサービス終了日時')->dateTime('Y/m/d H:i:s')->searchable(),
-                TextColumn::make('extra_requests')->label('その他お申し付け事項')->searchable(),
-                TextColumn::make('others_schedule')->label('4日目以降のサービス手配日時、終了日時')->searchable(),
             ])
             ->filters([
                 // 必要に応じて
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('generate_invoice')
-                    ->label('請求書作成')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->action(function ($record) {
-                        return \App\Http\Controllers\InvoiceController::download($record->id);
-                    })
-                    ->color('primary')
-                    ->requiresConfirmation()
-                    ->visible(fn ($record) => $record->guide_report_id !== null),
+                Tables\Actions\Action::make('duplicate')
+                    ->label('コピー')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->url(fn ($record) => HotelCaseResource::getUrl('create') . '?copy_from=' . $record->id)
+                    ->color('secondary'),
+                // 請求書作成ボタン（generate_invoice）を削除
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('generate_invoices')
-                        ->label('請求書作成')
-                        ->icon('heroicon-o-document-arrow-down')
-                        ->action(function ($records) {
-                            foreach ($records as $record) {
-                                if (!$record->guide_report_id) continue;
-                                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('invoices.hotel_case', [
-                                    'hotelCase' => $record,
-                                    'guideReport' => $record->guideReport,
-                                ]);
-                                $fileName = 'invoice_' . $record->id . '_' . now()->format('YmdHis') . '.pdf';
-                                $filePath = 'invoices/' . $fileName;
-                                \Storage::disk('local')->put($filePath, $pdf->output());
-                                \App\Models\Invoice::create([
-                                    'hotel_case_id' => $record->id,
-                                    'file_path' => $filePath,
-                                ]);
-                            }
-                        })
-                        ->requiresConfirmation()
-                        ->deselectRecordsAfterCompletion(),
+                    // 請求書作成（generate_invoices）を削除
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);

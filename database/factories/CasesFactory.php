@@ -29,13 +29,6 @@ class CasesFactory extends Factory
             'guide_language' => fake()->languageCode(),
             'vehicle_type' => fake()->word(),
             'desired_areas' => fake()->sentence(),
-            'extra_requests' => fake()->optional()->sentence(),
-            'multi_day' => fake()->boolean(),
-            'day2_start' => fake()->optional()->dateTime(),
-            'day2_end' => fake()->optional()->dateTime(),
-            'day3_start' => fake()->optional()->dateTime(),
-            'day3_end' => fake()->optional()->dateTime(),
-            'others_schedule' => fake()->optional()->sentence(),
         ];
     }
 }
