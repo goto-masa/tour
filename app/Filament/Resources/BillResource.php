@@ -28,15 +28,10 @@ class BillResource extends Resource
         return \App\Models\Bill::class;
     }
 
-    public static function getPluralLabel(): string
-    {
-        return '請求書';
-    }
-
-    public static function getLabel(): string
-    {
-        return '請求書';
-    }
+    protected static ?string $navigationLabel = '請求書管理';
+    protected static ?string $navigationGroup = null;
+    protected static ?string $label = '請求書';
+    protected static ?string $pluralLabel = '請求書';
 
     public static function form(Form $form): Form
     {
@@ -62,7 +57,7 @@ class BillResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('createDraft')
                     ->label('下書き作成')
-                    ->url(fn($record) => static::getUrl('create-draft-from-msgid-for-bill', ['record' => $record->getKey()]))
+                    ->url(fn($record) => route('bills.create-draft', $record))
                     ->icon('heroicon-o-pencil-square'),
             ])
             ->bulkActions([
@@ -86,7 +81,7 @@ class BillResource extends Resource
             'create' => Pages\CreateBill::route('/create'),
             'view' => Pages\ViewBill::route('/{record}'),
             'edit' => Pages\EditBill::route('/{record}/edit'),
-            'create-draft-from-msgid-for-bill' => Pages\CreateDraftFromMsgidForBill::route('/{record}/create-draft'),
+            // 'create-draft-from-msgid-for-bill' ページは不要なので削除
         ];
     }
 }

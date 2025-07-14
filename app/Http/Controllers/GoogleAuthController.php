@@ -62,7 +62,9 @@ class GoogleAuthController extends Controller
             ]
         );
 
-        return redirect('/create-draft')
+        $redirectUrl = session('after_google_auth_redirect', '/create-draft');
+        session()->forget('after_google_auth_redirect');
+        return redirect($redirectUrl)
             ->with('status', 'Google 認証が完了しました');
     }
 }
