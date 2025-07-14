@@ -8,6 +8,8 @@ use Google\Service\Gmail\Draft;
 use Google\Service\Gmail\Message;
 use Symfony\Component\Mime\Email;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use App\Models\GoogleToken;
 
 class GmailService
 {
@@ -20,16 +22,36 @@ class GmailService
         $client = new Client();
         $client->setAuthConfig(storage_path('app/google/credentials.json'));
 
-        /*  セッションからトークン取得  */
-        if (!$token = session('google_token')) {
+        // DBからトークン取得
+        $user = Auth::user();
+        if (!$user) {
+            throw new \RuntimeException('認証ユーザーが見つかりません。');
+        }
+        $googleToken = GoogleToken::where('user_id', $user->id)->first();
+        if (!$googleToken) {
             throw new \RuntimeException('Google token not found. Authenticate first.');
         }
+
+        $token = [
+            'access_token'  => $googleToken->access_token,
+            'refresh_token' => $googleToken->refresh_token,
+            'expires_in'    => $googleToken->expires_at ? $googleToken->expires_at->diffInSeconds(now()) : null,
+            'token_type'    => $googleToken->token_type,
+            'scope'         => $googleToken->scope,
+            'created'       => null, // Googleクライアントが必要なら追加
+        ];
         $client->setAccessToken($token);
 
-        /*  アクセストークンの自動更新  */
+        // アクセストークンの自動更新
         if ($client->isAccessTokenExpired() && $client->getRefreshToken()) {
-            $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-            session(['google_token' => $client->getAccessToken()]);
+            $newToken = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+            // DBも更新
+            $googleToken->update([
+                'access_token' => $newToken['access_token'] ?? $googleToken->access_token,
+                'expires_at'   => isset($newToken['expires_in']) ? now()->addSeconds($newToken['expires_in']) : $googleToken->expires_at,
+                'token_type'   => $newToken['token_type'] ?? $googleToken->token_type,
+                'scope'        => $newToken['scope'] ?? $googleToken->scope,
+            ]);
         }
 
         /*  下書き作成＋メール読み取りに必要なスコープ */
