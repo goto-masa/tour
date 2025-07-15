@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('cases', function (Blueprint $table) {
-            $table->dropColumn([
+            $columns = [
                 'multi_day',
                 'day2_start',
                 'day2_end',
@@ -20,7 +20,13 @@ return new class extends Migration
                 'day3_end',
                 'extra_requests',
                 'others_schedule',
-            ]);
+            ];
+
+            foreach ($columns as $column) {
+                if (Schema::hasColumn('cases', $column)) {
+                    $table->dropColumn($column);
+                }
+            }
         });
     }
 
@@ -30,13 +36,27 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('cases', function (Blueprint $table) {
-            $table->boolean('multi_day')->default(false)->comment('複数日で依頼する');
-            $table->timestamp('day2_start')->nullable()->comment('2日目のサービス手配日時');
-            $table->timestamp('day2_end')->nullable()->comment('2日目のサービス終了日時');
-            $table->timestamp('day3_start')->nullable()->comment('3日目のサービス手配日時');
-            $table->timestamp('day3_end')->nullable()->comment('3日目のサービス終了日時');
-            $table->text('extra_requests')->nullable()->comment('その他お申し付け事項');
-            $table->text('others_schedule')->nullable()->comment('4日目以降のサービス手配日時、終了日時');
+            if (!Schema::hasColumn('cases', 'multi_day')) {
+                $table->boolean('multi_day')->default(false)->comment('複数日で依頼する');
+            }
+            if (!Schema::hasColumn('cases', 'day2_start')) {
+                $table->timestamp('day2_start')->nullable()->comment('2日目のサービス手配日時');
+            }
+            if (!Schema::hasColumn('cases', 'day2_end')) {
+                $table->timestamp('day2_end')->nullable()->comment('2日目のサービス終了日時');
+            }
+            if (!Schema::hasColumn('cases', 'day3_start')) {
+                $table->timestamp('day3_start')->nullable()->comment('3日目のサービス手配日時');
+            }
+            if (!Schema::hasColumn('cases', 'day3_end')) {
+                $table->timestamp('day3_end')->nullable()->comment('3日目のサービス終了日時');
+            }
+            if (!Schema::hasColumn('cases', 'extra_requests')) {
+                $table->text('extra_requests')->nullable()->comment('その他お申し付け事項');
+            }
+            if (!Schema::hasColumn('cases', 'others_schedule')) {
+                $table->text('others_schedule')->nullable()->comment('4日目以降のサービス手配日時、終了日時');
+            }
         });
     }
-}; 
+};
