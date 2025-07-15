@@ -41,9 +41,9 @@ class AdminPanelProvider extends PanelProvider
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
             ])
-            ->assets([
-                Js::make('../filament-custom'),
-            ])
+            // ->assets([
+            //     Js::make('../filament-custom'),
+            // ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
