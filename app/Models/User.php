@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 
 class User extends Authenticatable
 {
@@ -48,5 +49,15 @@ class User extends Authenticatable
     public function canAccessPanel(\Filament\Panel $panel): bool
     {
         return true; // または $this->is_admin などの条件付きにしてもよい
+    }
+    public function hasFilamentAccess()
+    {
+        Log::debug('Filament access check', [
+            'id' => $this->id,
+            'email' => $this->email,
+            'roles' => $this->roles ?? null,
+            'is_admin' => $this->is_admin ?? null,
+        ]);
+        // ... 既存の判定ロジック ...
     }
 }
