@@ -19,8 +19,8 @@ return new class extends Migration
             $table->unsignedSmallInteger('guest_count')->comment('ゲスト人数');
             $table->text('request_detail')->comment('ご依頼内容（サービスの内容）');
             $table->string('dispatch_location')->comment('ガイドを派遣する場所');
-            $table->timestamp('service_start')->comment('サービス手配日時');
-            $table->timestamp('service_end')->comment('サービス終了日時');
+            $table->timestamp('service_start')->nullable()->comment('サービス手配日時');
+            $table->timestamp('service_end')->nullable()->comment('サービス終了日時');
             $table->unsignedInteger('service_hours')->comment('サービス提供時間');
             $table->string('guide_language', 50)->comment('ガイド言語');
             $table->string('vehicle_type', 100)->comment('希望車種');
