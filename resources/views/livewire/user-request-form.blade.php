@@ -66,7 +66,7 @@
     </div>
 
     <div class="mb-8">
-        <label class="block mb-1"><b>Guide Start Time</b><span class="text-red-500">*</span><br>
+        <label class="block mb-1"><b>Guide Start Date</b><span class="text-red-500">*</span><br>
             <span class="p-text">
                 ガイドがスタートした日時を入力してください。<br>
                 Enter the date and time when the guide started.
@@ -77,7 +77,7 @@
     </div>
 
     <div class="mb-8">
-        <label class="block mb-1"><b>Guide Finish Time</b><span class="text-red-500">*</span><br>
+        <label class="block mb-1"><b>Guide Finish Date</b><span class="text-red-500">*</span><br>
             <span class="p-text">
                 ガイドが終了した日時を入力してください。<br>
                 Enter the date and time the guide was completed.
@@ -144,8 +144,8 @@
             </span>
         </label>
         <div class="flex flex-col sm:flex-row gap-2 mb-2">
-            <input type="text" wire:model.defer="expense_item" placeholder="東京タワー入場券" class="border rounded p-2 w-full sm:flex-1" />
-            <input type="text" wire:model.defer="expense_amount" placeholder="1,000円" class="border rounded p-2 w-full sm:w-32" />
+            <input type="text" wire:model.defer="expense_item[]" placeholder="東京タワー入場券" class="border rounded p-2 w-full sm:flex-1" />
+            <input type="number" wire:model.defer="expense_amount[]" placeholder="1,000" class="border rounded p-2 w-full sm:w-32" />
             <button type="button" wire:click="addExpense" class="bg-blue-500 text-white px-3 py-1 rounded w-full sm:w-auto">追加</button>
         </div>
         <div class="bg-blue-50 border border-blue-200 rounded p-3 mb-2">

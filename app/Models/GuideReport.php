@@ -9,20 +9,19 @@ class GuideReport extends Model
 {
     use HasFactory;
 
-    protected $table = 'guide_report';
-
     protected $fillable = [
-        'guide_email',
-        'guide_name',
-        'guest_name',
-        'number_of_guests',
-        'service_date',
-        'finish_time',
-        'duration',
-        'schedules',
-        'expenses',
-        'report',
-        'comment',
+        'guide_email', // メールアドレス
+        'guide_name', // ガイド名
+        'guest_name', // ゲスト名
+        'number_of_guests', // ゲスト人数
+        'service_date', // ガイド開始日
+        'finish_time', // ガイド終了日
+        'duration', // ガイド時間
+        'schedules', // ガイドスケジュール
+        'expenses', // 立替経費
+        'report', // ガイドレポート
+        'expend_price', // 立替経費金額(合計)
+        'comment', // 備考
     ];
 
     protected $casts = [

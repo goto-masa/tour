@@ -27,4 +27,12 @@ class Hotel extends Model
         'lang',
         'note',
     ];
+
+    /**
+     * HotelCase（案件）とのリレーション
+     */
+    public function hotelCases()
+    {
+        return $this->hasMany(HotelCase::class, 'hotel_id');
+    }
 }
